@@ -1,15 +1,23 @@
-# pull official base image
-FROM node:13.12.0-alpine
+# Build react application
+FROM node:13.12.0-alpine AS build-stage
 
-# set working directory
 WORKDIR /app
 
-# install app dependencies
 COPY package.json ./
+
 RUN npm install
 
-# add app
 COPY . ./
 
-# start app
-CMD ["npm", "start"]
+RUN npm run build
+
+# Copy build to app directory and start the webserver
+FROM node:13.12.0-alpine
+
+WORKDIR /app
+
+RUN npm install -g serve
+
+COPY --from=build-stage /app/build .
+
+CMD ["serve", "-p", "80", "."]
