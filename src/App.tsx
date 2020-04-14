@@ -1,26 +1,36 @@
-import React from 'react';
-import logo from './logo.svg';
+import React, {useState} from 'react';
 import './App.css';
 
-function App() {
+export const App: React.FC = () => {
+  const [name, setName] = useState('')
+  const [participants, setParticipants] = useState<string[]>([])
+
+  const participantList = participants.map((participant) =>
+    <li key={participant}>{participant}</li>
+  )
+
+  const handleEnter = (key: string) => {
+    if (key === 'Enter') {
+      const theName = name
+      setParticipants(participants => [...participants, name])
+      setName('')
+    }
+  }
+
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+      <div>
+        <label>Participant
+          <input type="text" id="participant" value={name}
+                 onChange={e => setName(e.target.value)}
+                 onKeyDown={e => handleEnter(e.key)}/>
+        </label>
+      </div>
+      <div data-testid="participants">
+        <ul>{participantList}</ul>
+      </div>
     </div>
-  );
+  )
 }
 
-export default App;
+export default App
