@@ -1,34 +1,60 @@
 import React from 'react'
-import { render, fireEvent} from '@testing-library/react'
+import {render, fireEvent, RenderResult} from '@testing-library/react'
 import '@testing-library/jest-dom/extend-expect'
-import App from './App'
+import App, {Matcher} from './App'
 
 describe('App', () => {
-  it('starts out with no participants', () => {
-    const component = render(<App/>)
-    const input = component.getByLabelText('Participant') as HTMLInputElement
+    let component: RenderResult;
+    let participantInput: HTMLInputElement;
 
-    expect(input.value).toBe('')
-    expect(component.getByTestId('participants').textContent).toBe('')
-  })
+    beforeEach(function () {
+        component = render(<App matcher={matcherStub}/>);
+        participantInput = component.getByLabelText('Participant') as HTMLInputElement
+    });
 
-  it('allows names to be added to the list of participants', () => {
-    const component = render(<App />)
-    const input = component.getByLabelText('Participant') as HTMLInputElement
+    it('starts out with no participants', () => {
+        expect(participantInput.value).toBe('');
+        expect(component.getByTestId('participants').textContent).toBe('')
+    });
 
-    fireEvent.change(input, {
-      target: { value: 'Charlie' }
+    it('allows names to be added to the list of participants', () => {
+        fireEvent.change(participantInput, {
+            target: {value: 'Charlie'}
+        });
+        fireEvent.keyDown(participantInput, {key: 'Enter', code: 'Enter'});
+
+        expect(participantInput.value).toBe('');
+
+        fireEvent.change(participantInput, {
+            target: {value: 'Claire'}
+        });
+        fireEvent.keyDown(participantInput, {key: 'Enter', code: 'Enter'});
+
+        expect(component.getByTestId('participants').textContent).toContain('Charlie');
+        expect(component.getByTestId('participants').textContent).toContain('Claire')
     })
-    fireEvent.keyDown(input, {key: 'Enter', code: 'Enter'})
 
-    expect(input.value).toBe('')
+    it("shows one round and one pair when there are two participants", () => {
+        fireEvent.change(participantInput, {
+            target: {value: 'Charlie'}
+        });
+        fireEvent.keyDown(participantInput, {key: 'Enter', code: 'Enter'});
 
-    fireEvent.change(input, {
-      target: { value: 'Claire' }
+        fireEvent.change(participantInput, {
+            target: {value: 'Simon'}
+        });
+        fireEvent.keyDown(participantInput, {key: 'Enter', code: 'Enter'});
+
+        expect(component.getByText('Round 1')).toBeInTheDocument()
+        expect(component.getByText('Charlie and Simon')).toBeInTheDocument()
     })
-    fireEvent.keyDown(input, {key: 'Enter', code: 'Enter'})
-
-    expect(component.getByTestId('participants').textContent).toContain('Charlie')
-    expect(component.getByTestId('participants').textContent).toContain('Claire')
-  })
 })
+
+
+const matcherStub: Matcher = () => {
+  return [
+      [
+          ['Charlie', 'Simon']
+      ]
+  ]
+}
