@@ -43,7 +43,7 @@ export const App: React.FC<AppProps> = (props) => {
                         <h2>Round {roundNumber + 1}</h2>
                         <ul>
                             {round.map((pair, pairNumber) =>
-                                <li key='{roundNumber}_{pairNumber}'>{pair[0]} and {pair[1]}</li>
+                                <li key={roundNumber + '-' + pairNumber}>{pair[0]} and {pair[1]}</li>
                             )}
                         </ul>
                     </div>

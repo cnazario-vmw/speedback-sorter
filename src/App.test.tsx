@@ -3,58 +3,138 @@ import {render, fireEvent, RenderResult} from '@testing-library/react'
 import '@testing-library/jest-dom/extend-expect'
 import App, {Matcher} from './App'
 
-describe('App', () => {
-    let component: RenderResult;
-    let participantInput: HTMLInputElement;
+describe('Speedback Sorter Application', () => {
+    describe('Starting a new speedback', () => {
+        let component: RenderResult;
+        let participantInput: HTMLInputElement;
 
-    beforeEach(function () {
-        component = render(<App matcher={matcherStub}/>);
-        participantInput = component.getByLabelText('Participant') as HTMLInputElement
-    });
+        beforeEach(function () {
+            component = render(<App matcher={noPairMatcherStub}/>)
+        })
 
-    it('starts out with no participants', () => {
-        expect(participantInput.value).toBe('');
-        expect(component.getByTestId('participants').textContent).toBe('')
-    });
+        it('has no participants', () => {
+            participantInput = component.getByLabelText('Participant') as HTMLInputElement
 
-    it('allows names to be added to the list of participants', () => {
-        fireEvent.change(participantInput, {
-            target: {value: 'Charlie'}
-        });
-        fireEvent.keyDown(participantInput, {key: 'Enter', code: 'Enter'});
+            expect(participantInput.value).toBe('')
+            expect(component.getByTestId('participants').textContent).toBe('')
+        })
 
-        expect(participantInput.value).toBe('');
+        it('allows a participant to be added', () => {
+            participantInput = component.getByLabelText('Participant') as HTMLInputElement
 
-        fireEvent.change(participantInput, {
-            target: {value: 'Claire'}
-        });
-        fireEvent.keyDown(participantInput, {key: 'Enter', code: 'Enter'});
+            enterParticipantName(participantInput, 'Charlie')
 
-        expect(component.getByTestId('participants').textContent).toContain('Charlie');
-        expect(component.getByTestId('participants').textContent).toContain('Claire')
+            expect(participantInput.value).toBe('')
+            expect(component.getByTestId('participants').textContent).toContain('Charlie')
+        })
+
+        it('has no rounds', () => {
+            expect(() => {
+                component.getByText('Round 1')
+            }).toThrow()
+        })
     })
 
-    it("shows one round and one pair when there are two participants", () => {
-        fireEvent.change(participantInput, {
-            target: {value: 'Charlie'}
-        });
-        fireEvent.keyDown(participantInput, {key: 'Enter', code: 'Enter'});
+    describe('A speedback with one pair', () => {
+        let component: RenderResult
+        let participantInput: HTMLInputElement
 
-        fireEvent.change(participantInput, {
-            target: {value: 'Simon'}
-        });
-        fireEvent.keyDown(participantInput, {key: 'Enter', code: 'Enter'});
+        beforeEach(function () {
+            component = render(<App matcher={onePairMatcherStub}/>)
+        })
 
-        expect(component.getByText('Round 1')).toBeInTheDocument()
-        expect(component.getByText('Charlie and Simon')).toBeInTheDocument()
+        it('has two participants', () => {
+            participantInput = component.getByLabelText('Participant') as HTMLInputElement
+
+            enterParticipantName(participantInput, 'Charlie')
+            enterParticipantName(participantInput, 'Simon')
+
+            expect(participantInput.value).toBe('')
+            expect(component.getByTestId('participants').textContent).toContain('Charlie')
+            expect(component.getByTestId('participants').textContent).toContain('Simon')
+        })
+
+        it('has one round', () => {
+            expect(component.getByText('Round 1')).toBeInTheDocument()
+        })
+
+        it('has one pair', () => {
+            expect(component.getByText('Charlie and Simon')).toBeInTheDocument()
+        })
+    })
+
+    describe('A speedback with multiple pairs', () => {
+        let component: RenderResult
+        let participantInput: HTMLInputElement
+
+        beforeEach(function () {
+            component = render(<App matcher={multiPairMatcherStub} />)
+        })
+
+        it('has 4 participants', () => {
+            participantInput = component.getByLabelText('Participant') as HTMLInputElement
+
+            enterParticipantName(participantInput, 'Charlie')
+            enterParticipantName(participantInput, 'Simon')
+            enterParticipantName(participantInput, 'Samuel')
+            enterParticipantName(participantInput, 'Jennifer')
+
+            expect(component.getByTestId('participants').textContent).toContain('Charlie')
+            expect(component.getByTestId('participants').textContent).toContain('Simon')
+            expect(component.getByTestId('participants').textContent).toContain('Samuel')
+            expect(component.getByTestId('participants').textContent).toContain('Jennifer')
+        })
+
+        it('has three rounds', () => {
+            expect(component.getByText('Round 1')).toBeInTheDocument()
+            expect(component.getByText('Round 2')).toBeInTheDocument()
+            expect(component.getByText('Round 3')).toBeInTheDocument()
+        })
+
+        it('has 6 distinct pairs', () => {
+            expect(component.getByText('Charlie and Simon')).toBeInTheDocument()
+            expect(component.getByText('Samuel and Jennifer')).toBeInTheDocument()
+            expect(component.getByText('Charlie and Samuel')).toBeInTheDocument()
+            expect(component.getByText('Simon and Jennifer')).toBeInTheDocument()
+            expect(component.getByText('Charlie and Jennifer')).toBeInTheDocument()
+            expect(component.getByText('Simon and Samuel')).toBeInTheDocument()
+        })
     })
 })
 
-
-const matcherStub: Matcher = () => {
-  return [
-      [
-          ['Charlie', 'Simon']
-      ]
-  ]
+const enterParticipantName = (participantInput: HTMLInputElement, name: string) => {
+    fireEvent.change(participantInput, {
+        target: {value: name}
+    })
+    fireEvent.keyDown(participantInput, {key: 'Enter', code: 'Enter'})
 }
+
+const noPairMatcherStub: Matcher = () => {
+    return []
+}
+
+const onePairMatcherStub: Matcher = () => {
+    return [
+        [
+            ['Charlie', 'Simon']
+        ]
+    ]
+}
+
+const multiPairMatcherStub: Matcher = () => {
+    return [
+        [
+            ['Charlie', 'Simon'],
+            ['Samuel', 'Jennifer']
+        ],
+        [
+            ['Charlie', 'Samuel'],
+            ['Simon', 'Jennifer']
+        ],
+        [
+            ['Charlie', 'Jennifer'],
+            ['Simon', 'Samuel']
+        ]
+    ]
+}
+
