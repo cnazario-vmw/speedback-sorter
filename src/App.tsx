@@ -13,13 +13,15 @@ interface AppProps {
 export const App: React.FC<AppProps> = (props) => {
     const [name, setName] = useState('')
     const [participants, setParticipants] = useState<string[]>([])
+    const [rounds, setRounds] = useState<Rounds>([])
 
-    const rounds = props.matcher(participants)
-
-    const handleEnter = (key: string) => {
+    const checkForEnter = (key: string) => {
         if (key === 'Enter') {
-            setParticipants(participants => [...participants, name])
+            const newParticipants = [...participants, name]
+
+            setParticipants(newParticipants)
             setName('')
+            setRounds(props.matcher(newParticipants))
         }
     }
 
@@ -29,7 +31,7 @@ export const App: React.FC<AppProps> = (props) => {
                 <label>Participant
                     <input type="text" id="participant" value={name}
                            onChange={e => setName(e.target.value)}
-                           onKeyDown={e => handleEnter(e.key)}/>
+                           onKeyDown={e => checkForEnter(e.key)}/>
                 </label>
                 <ul data-testid="participants">
                     {participants.map((participant) => {
