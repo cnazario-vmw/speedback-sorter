@@ -1,5 +1,5 @@
 import React, {useState} from 'react';
-import './App.css';
+import './SpeedbackAdmin.css';
 
 type Pair = [string, string]
 type Round = Pair[]
@@ -10,7 +10,7 @@ interface AppProps {
     matcher: Matcher
 }
 
-export const App: React.FC<AppProps> = (props) => {
+export const SpeedbackAdmin: React.FC<AppProps> = (props) => {
     const [name, setName] = useState('')
     const [participants, setParticipants] = useState<string[]>([])
     const [rounds, setRounds] = useState<Rounds>([])
@@ -55,4 +55,4 @@ export const App: React.FC<AppProps> = (props) => {
     )
 }
 
-export default App
+export default SpeedbackAdmin

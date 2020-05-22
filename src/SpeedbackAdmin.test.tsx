@@ -1,7 +1,7 @@
 import React from 'react'
 import {fireEvent, render, RenderResult} from '@testing-library/react'
 import '@testing-library/jest-dom/extend-expect'
-import App from './App'
+import App from './SpeedbackAdmin'
 
 describe('when first started', () => {
     let component: RenderResult

@@ -1,10 +1,10 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import App, {Matcher} from './App';
+import SpeedbackAdmin , {Matcher} from './SpeedbackAdmin';
 
 ReactDOM.render(
   <React.StrictMode>
-    <App/>
+    <SpeedbackAdmin matcher={() => []}/>
   </React.StrictMode>,
   document.getElementById('root')
 );
