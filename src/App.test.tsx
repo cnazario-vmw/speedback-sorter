@@ -1,18 +1,20 @@
 import React from 'react'
-import {cleanup, fireEvent, render, RenderResult} from '@testing-library/react'
+import {fireEvent, render, RenderResult} from '@testing-library/react'
 import '@testing-library/jest-dom/extend-expect'
-import App, {Matcher} from './App'
+import App from './App'
 
-describe('Speedback Admin', () => {
+describe('when first started', () => {
     let component: RenderResult
     let participantInput: HTMLInputElement
+    let matcherSpy: jest.Mock
 
     beforeEach(() => {
-        component = render(<App matcher={matcherStubFactory}/>)
+        matcherSpy = jest.fn(() => [])
+        component = render(<App matcher={matcherSpy}/>)
         participantInput = component.getByLabelText('Participant') as HTMLInputElement
     });
 
-    it('has no participants when started', () => {
+    it('has no participants', () => {
         expect(participantInput.value).toBe('')
         expect(component.getByTestId('participants').textContent).toBe('')
     })
@@ -29,33 +31,56 @@ describe('Speedback Admin', () => {
     it('has no rounds with only 1 participant', () => {
         enterParticipantName(participantInput, 'Charlie')
 
-        expect(() => {
-            component.getByText('Round 1')
-        }).toThrow()
+        expect(component.queryByText('Round 1')).toBeNull()
     })
 
-    it('calls the matcher when a new name is entered', () => {
-        cleanup() // doing this to avoid errors with duplicate rendering
-
-        const matcherSpy = jest.fn(() => [])
-
-        const component = render(<App matcher={matcherSpy}/>)
-        const participantInput = component.getByLabelText('Participant') as HTMLInputElement
+    it('calls the matcher after a name is entered', () => {
         enterParticipantName(participantInput, 'Charlie')
 
         expect(matcherSpy).toHaveBeenCalledTimes(1)
         expect(matcherSpy).toHaveBeenCalledWith(['Charlie'])
     })
+})
 
-    it('has 1 round when there are 2 participants', () => {
+describe('when there are 2 participants', () => {
+    it('has 1 round', () => {
+        const component = render(
+            <App matcher={() => [
+                [
+                    ['Charlie', 'Simon']
+                ]
+            ]}/>
+        )
+        const participantInput = component.getByLabelText('Participant') as HTMLInputElement
+
         enterParticipantName(participantInput, 'Charlie')
         enterParticipantName(participantInput, 'Simon')
 
         expect(component.getByText('Round 1')).toBeInTheDocument()
         expect(component.getByText('Charlie and Simon')).toBeInTheDocument()
     })
+})
 
-    it('has 3 rounds when there are 4 participants', () => {
+describe('when there are 4 participants', () => {
+    it('has 3 rounds', () => {
+        const component = render(
+            <App matcher={() => [
+                [
+                    ['Charlie', 'Simon'],
+                    ['Samuel', 'Jennifer']
+                ],
+                [
+                    ['Charlie', 'Samuel'],
+                    ['Simon', 'Jennifer']
+                ],
+                [
+                    ['Charlie', 'Jennifer'],
+                    ['Simon', 'Samuel']
+                ]
+            ]}/>
+        )
+        const participantInput = component.getByLabelText('Participant') as HTMLInputElement
+
         enterParticipantName(participantInput, 'Charlie')
         enterParticipantName(participantInput, 'Simon')
         enterParticipantName(participantInput, 'Jennifer')
@@ -71,7 +96,6 @@ describe('Speedback Admin', () => {
         expect(component.getByText('Charlie and Jennifer')).toBeInTheDocument()
         expect(component.getByText('Simon and Samuel')).toBeInTheDocument()
     })
-
 })
 
 const enterParticipantName = (participantInput: HTMLInputElement, name: string) => {
@@ -80,39 +104,3 @@ const enterParticipantName = (participantInput: HTMLInputElement, name: string) 
     })
     fireEvent.keyDown(participantInput, {key: 'Enter', code: 'Enter'})
 }
-
-const matcherStubFactory: Matcher = (participants: string[]) => {
-    return (participants.length < 2) ? noPairMatcherStub(participants)
-        : (participants.length == 2) ? onePairMatcherStub(participants)
-        : multiPairMatcherStub(participants)
-}
-
-const noPairMatcherStub: Matcher = () => {
-    return []
-}
-
-const onePairMatcherStub: Matcher = () => {
-    return [
-        [
-            ['Charlie', 'Simon']
-        ]
-    ]
-}
-
-const multiPairMatcherStub: Matcher = () => {
-    return [
-        [
-            ['Charlie', 'Simon'],
-            ['Samuel', 'Jennifer']
-        ],
-        [
-            ['Charlie', 'Samuel'],
-            ['Simon', 'Jennifer']
-        ],
-        [
-            ['Charlie', 'Jennifer'],
-            ['Simon', 'Samuel']
-        ]
-    ]
-}
-

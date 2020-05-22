@@ -41,7 +41,7 @@ export const App: React.FC<AppProps> = (props) => {
             </div>
             <div className="Rounds">
                 {rounds.map((round, roundNumber) =>
-                    <div>
+                    <div key={roundNumber}>
                         <h2>Round {roundNumber + 1}</h2>
                         <ul>
                             {round.map((pair, pairNumber) =>
