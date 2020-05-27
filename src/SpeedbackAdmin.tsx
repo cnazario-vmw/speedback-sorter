@@ -1,10 +1,6 @@
 import React, {useState} from 'react';
 import './SpeedbackAdmin.css';
-
-type Pair = [string, string]
-type Round = Pair[]
-type Rounds = Round[]
-export type Matcher = (participants: string[]) => Rounds
+import {Matcher, Rounds} from './Matcher'
 
 interface AppProps {
     matcher: Matcher
