@@ -16,15 +16,14 @@ export const matcher: Matcher = (participants: string[]) => {
     const numberOfRounds = isEven ? names.length - 1 : names.length
 
     for (let i = 0; i < numberOfRounds; i++) {
-        let round = matchPairs(names, isEven)
-        rounds.push(round)
+        rounds.push(generatePairsForRound(names, isEven))
         names = rotatePairs(names, isEven)
     }
 
     return rounds
 }
 
-function matchPairs(names: string[], isEven: boolean) {
+function generatePairsForRound(names: string[], isEven: boolean) {
     const numberOfPairs = names.length / 2
 
     const topHalf = names.slice(0, numberOfPairs)
@@ -47,15 +46,16 @@ function matchPairs(names: string[], isEven: boolean) {
 
 function rotatePairs(names: string[], isEven: boolean) {
     if (isEven) {
-        const next = names.pop() as string
-        const head = names.shift() as string
-        names = [head, next, ...names]
+        const next = names[names.length - 1]
+        const head = names[0]
+        names = [head, next, ...names.slice(1, -1)]
     } else {
-        const next = names.pop() as string
-        names = [next, ...names]
+        const next = names[names.length - 1]
+        names = [next, ...names.slice(0, -1)]
     }
 
     return names
 }
 
 export default matcher
+

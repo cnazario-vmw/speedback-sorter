@@ -1,52 +1,38 @@
 import React, {useState} from 'react';
 import './SpeedbackAdmin.css';
 import {Matcher, Rounds} from './Matcher'
+import {RoundList} from './RoundList'
+import {ParticipantList} from './ParticipantList'
+import {ParticipantEntry} from './ParticipantEntry'
 
-interface AppProps {
+interface Props {
     matcher: Matcher
 }
 
-export const SpeedbackAdmin: React.FC<AppProps> = (props) => {
-    const [name, setName] = useState('')
+export const SpeedbackAdmin: React.FC<Props> = (props) => {
     const [participants, setParticipants] = useState<string[]>([])
     const [rounds, setRounds] = useState<Rounds>([])
+    const [error, setError] = useState<string>('')
 
-    const checkForEnter = (key: string) => {
-        if (key === 'Enter') {
-            const newParticipants = [...participants, name]
+    const handleAddParticipant = (participant: string) => {
+        if (participants.includes(participant)) {
+            setError('Name has already been added')
+        } else {
+            const newParticipants = [...participants, participant]
 
             setParticipants(newParticipants)
-            setName('')
             setRounds(props.matcher(newParticipants))
+            setError('')
         }
     }
 
     return (
         <div className="App">
             <div className="Names">
-                <label>Participant
-                    <input type="text" id="participant" value={name}
-                           onChange={e => setName(e.target.value)}
-                           onKeyDown={e => checkForEnter(e.key)}/>
-                </label>
-                <ul data-testid="participants">
-                    {participants.map((participant) => {
-                        return <li key={participant}>{participant}</li>
-                    })}
-                </ul>
+                <ParticipantEntry onAddParticipant={handleAddParticipant} error={error}/>
+                <ParticipantList participants={participants}/>
             </div>
-            <div className="Rounds">
-                {rounds.map((round, roundNumber) =>
-                    <div key={roundNumber}>
-                        <h2>Round {roundNumber + 1}</h2>
-                        <ul>
-                            {round.map((pair, pairNumber) =>
-                                <li key={roundNumber + '-' + pairNumber}>{pair[0]} and {pair[1]}</li>
-                            )}
-                        </ul>
-                    </div>
-                )}
-            </div>
+            <RoundList rounds={rounds}/>
         </div>
     )
 }

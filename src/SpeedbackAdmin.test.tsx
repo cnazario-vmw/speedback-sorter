@@ -2,6 +2,7 @@ import React from 'react'
 import {fireEvent, render, RenderResult} from '@testing-library/react'
 import '@testing-library/jest-dom/extend-expect'
 import App from './SpeedbackAdmin'
+import SpeedbackAdmin from './SpeedbackAdmin'
 
 describe('Speedback Admin', () => {
     describe('when first started', () => {
@@ -97,6 +98,33 @@ describe('Speedback Admin', () => {
             expect(component.getByText('Charlie and Jennifer')).toBeInTheDocument()
             expect(component.getByText('Simon and Samuel')).toBeInTheDocument()
         })
+    })
+
+    describe('When a duplicate name is entered', () => {
+        let component: RenderResult
+        let participantInput: HTMLInputElement
+
+        beforeEach(() => {
+            component = render(<SpeedbackAdmin matcher={() => []}/>)
+            participantInput = component.getByLabelText('Participant') as HTMLInputElement
+
+            enterParticipantName(participantInput, 'Charlie')
+            enterParticipantName(participantInput, 'Charlie')
+        })
+
+        it('should not be added to the list of participants', function () {
+            expect(component.getAllByText('Charlie').length).toEqual(1)
+        });
+
+        it('should display a error that the name has already been entered', () => {
+            expect(component.getByText('Name has already been added')).toBeInTheDocument()
+        })
+
+        it('removes the error when the next name is added', function () {
+            enterParticipantName(participantInput, 'Simon')
+
+            expect(component.queryByText('Name has already been added')).not.toBeInTheDocument()
+        });
     })
 })
 
