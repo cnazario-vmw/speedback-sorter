@@ -100,7 +100,7 @@ describe('Speedback Admin', () => {
         })
     })
 
-    describe('When a duplicate name is entered', () => {
+    describe('when a duplicate name is entered', () => {
         let component: RenderResult
         let participantInput: HTMLInputElement
 
@@ -114,7 +114,7 @@ describe('Speedback Admin', () => {
 
         it('should not be added to the list of participants', function () {
             expect(component.getAllByText('Charlie').length).toEqual(1)
-        });
+        })
 
         it('should display a error that the name has already been entered', () => {
             expect(component.getByText('Name has already been added')).toBeInTheDocument()
@@ -124,7 +124,46 @@ describe('Speedback Admin', () => {
             enterParticipantName(participantInput, 'Simon')
 
             expect(component.queryByText('Name has already been added')).not.toBeInTheDocument()
-        });
+        })
+
+        it('should be ignored if it only differs in casing', function () {
+            enterParticipantName(participantInput, 'Simon')
+            enterParticipantName(participantInput, 'simon')
+
+            expect(component.getAllByText(/simon/i).length).toEqual(1)
+        })
+    })
+
+    describe('when the clear button is clicked', () => {
+        it('empties the list of participants', () => {
+            const component = render(<SpeedbackAdmin matcher={() => []}/>)
+            const participantInput = component.getByLabelText('Participant') as HTMLInputElement
+
+            enterParticipantName(participantInput, 'Charlie')
+
+            fireEvent.click(component.getByText('Clear'))
+
+            expect(component.queryByText('Charlie')).not.toBeInTheDocument()
+        })
+
+        it('empties the list of rounds', () => {
+            const component = render(
+                <SpeedbackAdmin matcher={() => [
+                    [
+                        ['Charlie', 'Simon']
+                    ]
+                ]}/>
+            )
+            const participantInput = component.getByLabelText('Participant') as HTMLInputElement
+
+            enterParticipantName(participantInput, 'Charlie')
+            enterParticipantName(participantInput, 'Simon')
+
+            fireEvent.click(component.getByText('Clear'))
+
+            expect(component.queryByText('Round 1')).not.toBeInTheDocument()
+            expect(component.queryByText('Charlie and Simon')).not.toBeInTheDocument()
+        })
     })
 })
 
