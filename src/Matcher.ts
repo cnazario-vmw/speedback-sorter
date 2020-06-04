@@ -1,5 +1,5 @@
-type Pair = [string, string]
-type Round = Pair[]
+export type Pair = [string, string]
+export type Round = Pair[]
 export type Rounds = Round[]
 export type Matcher = (participants: string[]) => Rounds
 
