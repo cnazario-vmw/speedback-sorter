@@ -7,9 +7,7 @@ interface Props {
 
 export const RoundList: React.FC<Props> = (props) => {
     const pairFormatter = (participantA: string, participantB: string) => {
-        if (participantA === '') {
-            return participantB + ' sits out'
-        } else if (participantB === '') {
+        if (participantB === '') {
             return participantA + ' sits out'
         }
 
