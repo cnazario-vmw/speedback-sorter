@@ -6,46 +6,56 @@ export type Matcher = (participants: string[]) => Rounds
 export const matcher: Matcher = (participants: string[]) => {
     let rounds: Rounds = []
 
-    if (!participants || participants.length < 2) {
-        return rounds
-    }
-
     let names = Array.from(participants)
 
-    const isEven = (names.length % 2 === 0) ? true : false
-    const numberOfRounds = isEven ? names.length - 1 : names.length
-
-    for (let i = 0; i < numberOfRounds; i++) {
-        rounds.push(generatePairsForRound(names, isEven))
-        names = rotatePairs(names, isEven)
+    for (let i = 0; i < getNumberOfRounds(names); i++) {
+        rounds.push(generatePairsForRound(names))
+        names = rotatePairs(names)
     }
 
     return rounds
 }
 
-function generatePairsForRound(names: string[], isEven: boolean) {
+const getNumberOfRounds = (names: string[]): number => {
+    if (names.length < 2) {
+        return 0
+    }
+    else if (isEven(names)) {
+        return names.length - 1
+    }
+
+    return names.length
+}
+
+const isEven = (names: string[]): boolean => {
+    return names.length % 2 === 0
+}
+
+function generatePairsForRound(names: string[]) {
     const numberOfPairs = names.length / 2
 
-    const topHalf = names.slice(0, numberOfPairs)
-    const bottomHalf = names.slice(numberOfPairs, names.length).reverse()
+    const groupA = names.slice(0, numberOfPairs)
+    const groupB = names.slice(numberOfPairs, names.length).reverse()
 
     let round: Round = []
-    topHalf.forEach((_, index) => {
+    groupA.forEach((_, index) => {
         let pair: Pair = [
-            topHalf[index],
-            bottomHalf[index]
+            groupA[index],
+            groupB[index]
         ]
         round.push(pair)
     })
 
-    if (!isEven) {
-        round.push([bottomHalf[bottomHalf.length - 1], ''])
+    if (!isEven(names)) {
+        // The empty string is used to denote that someone will sit out each round because there is
+        // an odd number of participants
+        round.push([groupB[groupB.length - 1], ''])
     }
     return round
 }
 
-function rotatePairs(names: string[], isEven: boolean) {
-    if (isEven) {
+function rotatePairs(names: string[]) {
+    if (isEven(names)) {
         const next = names[names.length - 1]
         const head = names[0]
         names = [head, next, ...names.slice(1, -1)]
