@@ -100,6 +100,36 @@ describe('Speedback Admin', () => {
         })
     })
 
+    describe('when there are an odd number of participants', () => {
+        it('should have someone sitting out in the round', () => {
+            const component = render(
+                <App matcher={() => [
+                    [
+                        ['Charlie', 'Simon'],
+                        ['Bob', '']
+                    ],
+                    [
+                        ['Charlie', 'Bob'],
+                        ['Simon', '']
+                    ],
+                    [
+                        ['Simon', 'Bob'],
+                        ['Charlie', '']
+                    ]
+                ]}/>
+            )
+            const participantInput = component.getByLabelText('Participant') as HTMLInputElement
+
+            enterParticipantName(participantInput, 'Charlie')
+            enterParticipantName(participantInput, 'Simon')
+            enterParticipantName(participantInput, 'Bob')
+
+            expect(component.getByText('Charlie sits out')).toBeInTheDocument()
+            expect(component.getByText('Simon sits out')).toBeInTheDocument()
+            expect(component.getByText('Bob sits out')).toBeInTheDocument()
+        })
+    })
+
     describe('when a duplicate name is entered', () => {
         let component: RenderResult
         let participantInput: HTMLInputElement
