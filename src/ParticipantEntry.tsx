@@ -9,7 +9,7 @@ export const ParticipantEntry: React.FC<Props> = (props) => {
     const [name, setName] = useState('')
 
     const checkForEnter = (key: string) => {
-        if (key === 'Enter') {
+        if (key === 'Enter' && name.length > 0) {
             props.onAddParticipant(name)
             setName('')
         }

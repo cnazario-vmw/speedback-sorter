@@ -28,7 +28,7 @@ export const SpeedbackAdmin: React.FC<Props> = (props) => {
 
     const hasParticipantCaseInsensitive = (newParticipant: string) => {
         const index = participants.findIndex(value => newParticipant.toLowerCase() === value.toLowerCase())
-        return index != -1
+        return index !== -1
     }
 
     const handleClearParticipants = () => {

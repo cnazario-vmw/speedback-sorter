@@ -165,6 +165,18 @@ describe('Speedback Admin', () => {
             expect(component.queryByText('Charlie and Simon')).not.toBeInTheDocument()
         })
     })
+
+    describe('when enter is pressed with no name', () => {
+        it('does not add any participants', () => {
+            const component = render(<SpeedbackAdmin matcher={() => []}/>)
+            const participantInput = component.getByLabelText('Participant') as HTMLInputElement
+
+            enterParticipantName(participantInput, '')
+            enterParticipantName(participantInput, '')
+
+            expect(component.queryByText('Name has already been added')).not.toBeInTheDocument()
+        })
+    })
 })
 
 const enterParticipantName = (participantInput: HTMLInputElement, name: string) => {
